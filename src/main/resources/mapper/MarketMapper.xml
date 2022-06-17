@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.proj.web.dao.MarketMapper">
+
+	<select id="listMarket" parameterType="hashmap" resultType="market">
+		select 
+			work_seq
+		    ,gallery_seq
+		    ,work_name
+		    ,work_description
+		from 
+			work
+		where 
+			member_id = #{member_id}
+		<if test="#{searchText} != null">
+		and
+			work_name like '%' || #{searchText} || '%'
+		</if>
+		order by gallery_seq desc
+	</select>
+	
+	<select id="listMarket_6" parameterType="hashmap" resultType="market">
+		select 
+			work_seq
+		    ,gallery_seq
+		    ,work_name
+		    ,work_description
+		from 
+			work
+		where
+			member_id = #{member_id}
+		and
+            rownum <![CDATA[ < ]]>  7
+		<if test="#{searchText} != null">
+		and
+			work_name like '%' || #{searchText} || '%'
+		</if>
+		order by gallery_seq desc
+	</select>
+	
+	<!-- 전체 글 개수 (검색 필터링 후) -->
+	<select id="getTotal" parameterType="hashmap" resultType="int">
+		select 
+			count(*)
+		from 
+			work
+		where 
+			member_id = #{member_id}
+		<if test="_parameter != null">
+		and
+			work_name like '%' || #{searchText} || '%'
+		</if>
+		order by gallery_seq desc
+	</select>
+	
+	<insert id="insertMarket" parameterType="market">
+		insert into market(
+			market_seq
+			,work_seq
+			,gallery_seq
+			,work_name
+			,work_description
+			,member_id 
+			,member_nickname   
+			,market_price 
+			,market_amount
+			,market_size 
+			,sale_state
+		)values(
+			market_seq.nextval
+			,#{work_seq}
+			,#{gallery_seq}
+			,#{work_name}
+			,#{work_description}
+			,#{member_id} 
+			,#{member_nickname}   
+			,#{market_price} 
+			,#{market_amount}
+			,#{market_size}
+			,#{sale_state}
+		)
+	</insert>
+
+	<select id="MarketAll" resultType="market">
+		select
+			market_seq
+			,work_seq
+			,gallery_seq
+			,work_name
+			,work_description
+			,member_id 
+			,member_nickname   
+			,market_price 
+			,market_amount
+		from
+			market
+		where
+    		sale_state = 1
+		order by
+			market_seq desc
+	</select>
+	
+	<select id="marketOne" resultType="market" parameterType="int">
+		select
+			market_seq
+			,work_seq
+			,gallery_seq
+			,work_name
+			,work_description
+			,member_id 
+			,member_nickname   
+			,market_price 
+			,market_amount
+			,market_size
+		from
+			market
+		where
+			market_seq = #{market_seq}
+	</select>
+
+	<select id="selectMarketWork" parameterType="hashmap" resultType="work">
+		select
+		    work_seq
+		    ,gallery_seq as id
+		    ,work_name
+		    ,work_description
+		from
+		    work
+		where
+		    gallery_seq = #{gallery_seq}
+		and
+		    work_seq = #{work_seq}
+	</select>
+	
+	<select id="getMarketTotal" parameterType="string" resultType="int">
+		select 
+			count(*)
+		from 
+			market
+		where
+    		sale_state = 1
+		<if test="_parameter != null">
+		and
+			work_name like '%' || #{searchText} || '%'
+		</if>
+		order by market_seq desc
+	</select>
+	
+	<select id="marketlistAll" parameterType="string" resultType="market">
+		select 
+			market_seq
+			,work_seq
+			,gallery_seq
+			,work_name
+			,work_description
+			,member_id 
+			,member_nickname   
+			,market_price 
+			,market_amount
+		from 
+			market
+		where
+    		sale_state = 1
+		<if test="_parameter != null">
+		and
+			work_name like '%' || #{searchText} || '%'
+		</if>
+		order by market_seq desc
+	</select>
+	
+	<select id="myWorkSellRecord" parameterType="String" resultType="market">
+		select
+		    market_seq
+			,work_seq
+			,gallery_seq
+			,work_name
+			,work_description
+			,member_id 
+			,member_nickname   
+			,market_price 
+			,market_amount
+			,market_size
+			,sale_state
+		from
+		    market
+		where
+		    member_id = #{member_id}
+	</select>
+	
+	<select id="insertBuy" parameterType="buy">
+		insert into 
+		    buy(
+		        buy_name
+		        ,buy_amount
+		        ,buy_bank
+		        ,buy_account
+		        ,buy_price
+		        ,buy_zipNo
+		        ,buy_address
+		        ,market_seq
+		        ,member_id
+		    )values(
+		    	#{buy_name}
+		    	,#{buy_amount}
+		    	,#{buy_bank}
+		    	,#{buy_account}
+		    	,#{buy_price}
+		    	,#{buy_zipNo}
+		    	,#{buy_address}
+		    	,#{market_seq}
+		    	,#{member_id}
+		    )
+	</select>
+
+	<update id="updateAmount" parameterType="buy">
+		update
+		    market
+		set
+		    market_amount = market_amount - #{buy_amount}
+		where
+		    market_seq = #{market_seq}
+	</update>
+	
+	<select id="selectBuy" parameterType="String" resultType="hashmap">
+		select
+		    b.buy_name as buy_name
+		    ,b.buy_amount as buy_amount
+		    ,b.buy_bank as buy_bank
+		    ,b.buy_account as buy_account
+		    ,b.buy_price as buy_price
+		    ,b.buy_zipno as buy_zipno
+		    ,b.buy_address as buy_address
+		    ,b.market_seq as market_seq
+		    ,m.gallery_seq as gallery_seq
+		    ,m.work_seq as work_seq
+		from
+		    buy b, market m
+		where
+		    b.market_seq = m.market_seq
+		and
+		    b.member_id = #{member_id}
+	</select>
+	
+	<update id="saleStop" parameterType="int">
+		update
+			market
+		set
+			sale_state = 2
+		where
+			market_seq = #{market_seq}	
+	</update>
+	
+
+</mapper>

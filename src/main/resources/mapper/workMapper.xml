@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.proj.web.dao.WorkMapper">
+
+	<insert id="galleryWrite" parameterType="gallery">
+		insert into gallery(
+			 gallery_seq
+        	,member_id
+        	,title
+        	,"start"
+        	,"end"
+        	,gallery_template
+        	,member_nickname
+		)values(
+			gallery_seq.nextval
+			,#{member_id}
+			,#{title}
+			,#{start}
+			,#{end}
+			,#{gallery_template}
+			,#{member_nickname}
+		)
+	</insert>
+
+	<insert id="workWrite" parameterType="work">
+		insert into work(
+		    work_seq
+		    ,gallery_seq
+		    ,work_originalFileName
+		    ,work_savedFileName
+		    ,work_name
+		    ,work_description
+		    ,member_id
+		)values(
+		    #{work_seq}
+		    ,#{id}
+		    ,#{work_originalFileName}
+		    ,#{work_savedFileName}
+		    ,#{work_name}
+		    ,#{work_description}
+		    ,#{member_id}
+		)
+	</insert>
+
+	<select id="gallery_Seq" resultType="int">
+		select
+    		gallery_seq.nextval
+    	from
+    		dual
+	</select>
+	
+	<select id="gallerySelectAll" resultType="gallery">
+		select
+    		gallery_seq as id
+    		,member_id 
+    		,title 
+    		,"start" 
+   			,"end" 
+		from
+    		gallery
+	</select>	
+	
+	<select id="presentGallery" parameterType="int" resultType="gallery">
+		select
+    		gallery_seq as id
+    		,member_id 
+    		,title 
+    		,"start" 
+   			,"end" 
+		from
+    		gallery
+		where
+			gallery_seq = #{id}
+	</select>
+	
+	<select id="informationGalleryJsp" parameterType="int" resultType="hashmap">
+		select
+		    g.gallery_seq as gallery_seq
+		    ,g.member_id as member_id
+		    ,g.title as title
+		    ,w.work_originalFileName as work_originalFileName
+		    ,w.work_savedFileName as work_savedFileName
+		    ,w.work_seq as work_seq
+		    ,to_char(g."start",'yyyy-mm-dd') as "start"
+    		,to_char(g."end",'yyyy-mm-dd') as "end"
+    		,g.member_nickname as member_nickname
+		from
+		    gallery g
+		    ,work w
+		where
+		    g.gallery_seq = w.gallery_seq
+		and
+		    w.work_seq = 0
+		and
+		    g.gallery_seq = #{id}
+	</select>
+	
+	<select id="onlyMemberInformationGalleryJsp" parameterType="String" resultType="hashmap">
+		select
+		    g.gallery_seq as gallery_seq
+		    ,g.member_id as member_id
+		    ,g.title as title
+		    ,w.work_originalFileName as work_originalFileName
+		    ,w.work_savedFileName as work_savedFileName
+		    ,w.work_seq as work_seq
+		    ,to_char(g."start",'yyyy-mm-dd') as "start"
+    		,to_char(g."end",'yyyy-mm-dd') as "end"
+    		,g.member_nickname as member_nickname
+		from
+		    gallery g
+		    ,work w
+		where
+		    g.gallery_seq = w.gallery_seq
+		and
+		    w.work_seq = 0
+		and
+    		g.member_id = #{member_id}
+	</select>
+	
+	<select id="selectGalleryOne" parameterType="int" resultType="hashmap">
+		select
+    		g.gallery_seq as id
+   		 	,g.title as title
+		    ,w.work_savedFileName as work_savedFileName
+		    ,w.work_originalFileName as work_originalFileName
+		    ,w.work_seq as work_seq
+		    ,g.gallery_template as gallery_template
+		    ,g.member_id as member_id
+		    ,w.work_name as work_name
+		    ,g.member_nickname as member_nickname
+		    ,g.gallery_like as gallery_like
+		from
+		    gallery g, work w
+		where
+			 g.gallery_seq = w.gallery_seq
+    	and
+            g.gallery_seq = #{gallery_seq}
+	</select>
+	
+	
+	<select id="selectWorkOne" parameterType="hashmap" resultType="work">
+		select
+    		work_description
+    		,work_name
+    		,work_originalfilename
+    		,work_savedfilename
+		from
+    		work
+		where
+    		gallery_seq = #{id}
+		and
+    		work_seq = #{work_seq}
+	</select>
+	
+	<select id="selectMyGallery" parameterType="String" resultType="hashmap">
+		select
+		    g.gallery_seq as gallery_seq
+		    ,g.member_id as member_id
+		    ,g.title as title
+		    ,w.work_seq as work_seq
+		    ,to_char(g."start",'yyyy-mm-dd') as "start"
+    		,to_char(g."end",'yyyy-mm-dd') as "end"
+		from
+    		gallery g
+    		,work w
+		where
+    		g.gallery_seq = w.gallery_seq
+		and
+		    w.work_seq = 0
+		and
+		    g.member_id = #{member_id}
+	</select>
+	
+	<delete id="deleteGallery" parameterType="int">
+		delete from
+    		gallery
+		where
+    		gallery_seq = #{gallery_seq}
+	</delete>
+	
+	<insert id="insertReply" parameterType="reply">
+		insert into
+			reply(
+				reply_seq
+				,gallery_seq
+				,member_id
+				,member_nickname
+				,reply_text
+			)values(
+				reply_seq.nextval
+				, #{id}
+				, #{member_id}
+				, #{member_nickname}
+				, #{reply_text}
+			)
+	</insert>
+	
+	<select id="getReplyList_5" resultType="reply" parameterType="int">
+		select
+			reply_seq
+			,gallery_seq
+			,member_id
+			,member_nickname
+			,to_char(reply_indate, 'YYYY-MM-DD') as reply_indate
+			,reply_text
+		from
+			reply
+		where
+			gallery_seq = #{id}
+		and
+            rownum <![CDATA[ < ]]>  6
+		order by
+			reply_seq asc
+	</select>
+	
+	<select id="getReplyList" resultType="reply" parameterType="int">
+		select
+			reply_seq
+			,gallery_seq
+			,member_id
+			,member_nickname
+			,to_char(reply_indate, 'YYYY-MM-DD') as reply_indate
+			,reply_text
+		from
+			reply
+		where
+			gallery_seq = #{id}
+		order by
+			reply_seq asc
+	</select>
+	
+	<delete id="deleteReply" parameterType="reply">
+		delete
+		from
+			reply
+		where
+			reply_seq = #{reply_seq}
+			and member_id = #{member_id}
+	</delete>
+	
+	<!-- 리플 수정 -->
+	<update id="updateReply" parameterType="reply">
+		update
+			reply
+		set
+			reply_text = #{reply_text}
+		where
+			reply_seq = #{reply_seq}
+			and member_id = #{member_id}
+	</update>
+	
+	<select id="listGallery" parameterType="hashmap" resultType="hashmap">
+		select 
+			g.gallery_seq as gallery_seq
+		    ,g.member_id as member_id
+		    ,g.title as title
+		    ,w.work_seq as work_seq
+		    ,to_char(g."start",'yyyy-mm-dd') as "start"
+    		,to_char(g."end",'yyyy-mm-dd') as "end"
+		from 
+			gallery g
+    		,work w
+		where 
+			g.gallery_seq = w.gallery_seq
+		and
+			w.work_seq = 0
+		and
+		    g.member_id = #{member_id}
+		<if test="#{searchText} != null">
+		and
+			title like '%' || #{searchText} || '%'
+		</if>
+		order by gallery_seq desc
+	</select>
+	
+	<select id="getGalTotal" parameterType="hashmap" resultType="int">
+		select 
+			count(*)
+		from 
+			gallery
+		where 
+			member_id = #{member_id}
+		<if test="_parameter != null">
+		and
+			title like '%' || #{searchText} || '%'
+		</if>
+		order by gallery_seq desc
+	</select>
+	
+	<select id="likeCount" parameterType="int" resultType="int">
+		select
+			gallery_like
+		from
+		    gallery
+		where
+		    gallery_seq = #{gallery_seq}
+	</select>
+	
+
+	<update id="plusLike" parameterType="int">
+		update
+    		gallery
+		set
+    		gallery_like = gallery_like + 1
+		where
+    		gallery_seq = #{gallery_seq}
+	</update>
+	
+	
+	<update id="minusLike" parameterType="int">
+		update
+    		gallery
+		set
+    		gallery_like = gallery_like - 1
+		where
+    		gallery_seq = #{gallery_seq}
+	</update>
+	
+	<insert id="onLike" parameterType="like">
+		insert into 
+		    like_check(
+		        member_id
+		        ,gallery_seq
+		    )values(
+				#{member_id}
+		        ,#{gallery_seq}
+		    )
+	</insert>
+	
+	<delete id="offLike" parameterType="like">
+		delete from
+		    like_check
+		where
+		    member_id = #{member_id}
+		and
+		    gallery_seq = #{gallery_seq}
+	</delete>
+	
+	<select id="likeCheck" parameterType="like" resultType="int">
+		select
+		    count(*)
+		from
+		    like_check
+		where
+		    member_id = #{member_id}
+		and
+		    gallery_seq = #{gallery_seq}
+	</select>
+
+</mapper>
